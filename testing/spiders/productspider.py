@@ -11,9 +11,7 @@ class ProductSpider(scrapy.Spider):
             return
 
         for link in product_links:
-            yield {
-                'link': link.attrib['href']
-            }
+            yield response.follow(link, self.parse_product)
 
         # Get the current page number from the URL
         current_page = int(response.url.split('=')[-1])
@@ -23,3 +21,9 @@ class ProductSpider(scrapy.Spider):
 
         # Yield a request to the next page
         yield scrapy.Request(next_page, self.parse)
+    
+    def parse_product(self, response):
+        yield {
+            'name': response.css('capitalize text-lg md:text-[1.375rem] font-[familySemiBold] leading-none::text').get().strip(),
+            # 'price': response.css('.price::text').get().strip(),
+        }
